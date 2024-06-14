@@ -1,3 +1,4 @@
+// load mongodb driver from npm
 const { MongoClient, ObjectId } = require("mongodb");
 
 const connectionUrl = "mongodb://127.0.0.1:27017";
@@ -14,6 +15,7 @@ MongoClient.connect(
       return console.log("Unable to connect databse!");
     }
 
+    // create db instance
     const db = client.db(dbName);
     // insert one document
     // db.collection("users").insertOne({
