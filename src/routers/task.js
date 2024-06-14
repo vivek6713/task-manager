@@ -2,6 +2,7 @@ const express = require("express");
 const Task = require("../models/task.js");
 const router = new express.Router();
 const auth = require("../middleware/auth.js");
+const User = require("../models/user.js");
 
 // create task
 router.post("/task", auth, async (req, res) => {
@@ -20,10 +21,30 @@ router.post("/task", auth, async (req, res) => {
 });
 
 // fetch all tasks
+// tasks?completed=true
+// tasks?limit=10&skip:10
+// tasks?sortBy=createdAt:desc
 router.get("/tasks", auth, async (req, res) => {
+  const match = {};
+  const sort = {};
+  if (req.query.completed) {
+    match.completed = req.query.completed === "true";
+  }
+  if (req.query.sortBy) {
+    const parts = req.query.sortBy.split(":");
+    sort[parts[0]] = parts[1] === "desc" ? -1 : 1;
+  }
   try {
-    const tasks = await Task.find({ owner: req.user._id });
-    res.send(tasks);
+    await req.user.populate({
+      path: "tasks",
+      match,
+      options: {
+        limit: parseInt(req.query.limit),
+        skip: parseInt(req.query.skip),
+        sort,
+      },
+    });
+    res.send(req.user.tasks);
   } catch (error) {
     res.status(500).send();
   }

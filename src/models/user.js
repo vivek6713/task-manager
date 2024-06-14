@@ -5,54 +5,59 @@ const jwt = require("jsonwebtoken");
 const Task = require("./task");
 
 // making schema for add middleware
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true, // add validation
-    trim: true,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true, // add validation
-    trim: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Invalid email address");
-      }
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true, // add validation
+      trim: true,
     },
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    validate(value) {
-      if (value.length < 6) {
-        throw new Error("Password must be greater than 6 char.");
-      }
-      if (value.includes("password")) {
-        throw new Error("Password must not contain password");
-      }
-    },
-  },
-  age: {
-    type: Number,
-    default: 0,
-    validate(value) {
-      if (value < 0) {
-        throw new Error("Age must be positive number.");
-      }
-    },
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+    email: {
+      type: String,
+      unique: true,
+      required: true, // add validation
+      trim: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid email address");
+        }
       },
     },
-  ],
-});
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      validate(value) {
+        if (value.length < 6) {
+          throw new Error("Password must be greater than 6 char.");
+        }
+        if (value.includes("password")) {
+          throw new Error("Password must not contain password");
+        }
+      },
+    },
+    age: {
+      type: Number,
+      default: 0,
+      validate(value) {
+        if (value < 0) {
+          throw new Error("Age must be positive number.");
+        }
+      },
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
 
 // define relation with task it is virtual so not store in database
 userSchema.virtual("tasks", {
