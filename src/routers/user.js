@@ -3,6 +3,7 @@ const User = require("../models/user.js");
 const auth = require("../middleware/auth.js");
 const Task = require("../models/task.js");
 const multer = require("multer");
+const sendWelcomeMail = require("../emails/accounts.js");
 
 const router = new express.Router();
 
@@ -11,6 +12,8 @@ router.post("/users", async (req, res) => {
   const user = new User(req.body);
   try {
     await user.save();
+    console.log(user.email, user.name);
+    // sendWelcomeMail(user.email, user.name);
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
