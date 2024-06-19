@@ -8,7 +8,7 @@ const sendWelcomeMail = require("../emails/accounts.js");
 const router = new express.Router();
 
 // create user
-router.post("/users", async (req, res) => {
+router.post("/users", async (req, res, next) => {
   const user = new User(req.body);
   try {
     await user.save();
@@ -16,7 +16,7 @@ router.post("/users", async (req, res) => {
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 
   // handling with then
@@ -31,18 +31,18 @@ router.post("/users", async (req, res) => {
 });
 
 // login route
-router.post("/user/login", async (req, res) => {
+router.post("/user/login", async (req, res, next) => {
   try {
     const user = await User.findByCredential(req.body.email, req.body.password);
     const token = await user.generateAuthToken();
     res.send({ user, token });
   } catch (error) {
-    res.status(400).send();
+    next(error);
   }
 });
 
 // logout user
-router.post("/user/logout", auth, async (req, res) => {
+router.post("/user/logout", auth, async (req, res, next) => {
   try {
     const token = req.token;
     req.user.tokens = req.user.tokens.filter((token) => {
@@ -50,19 +50,19 @@ router.post("/user/logout", auth, async (req, res) => {
     });
     await req.user.save();
     res.send();
-  } catch (e) {
-    res.status(500).send();
+  } catch (error) {
+    next(error);
   }
 });
 
 // logout from all device
-router.post("/user/logoutAll", auth, async (req, res) => {
+router.post("/user/logoutAll", auth, async (req, res, next) => {
   try {
     req.user.tokens = [];
     await req.user.save();
     res.send();
-  } catch (e) {
-    res.status(500).send();
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -82,12 +82,12 @@ router.get("/user/me", auth, async (req, res) => {
 //     }
 //     res.send(user);
 //   } catch (error) {
-//     res.status(500).send();
+//     next(error);
 //   }
 // });
 
 // update user
-router.patch("/user/me", auth, async (req, res) => {
+router.patch("/user/me", auth, async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "email", "password", "age"];
@@ -108,19 +108,19 @@ router.patch("/user/me", auth, async (req, res) => {
     // });
     res.send(user);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
 // delete user
-router.delete("/user/me", auth, async (req, res) => {
+router.delete("/user/me", auth, async (req, res, next) => {
   try {
     await User.findByIdAndDelete(req.user._id);
     await Task.deleteMany({ owner: req.user._id });
     // await user.remove();
     res.send(req.user);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
@@ -159,7 +159,7 @@ router.delete("/user/me/avatar", auth, async (req, res) => {
 });
 
 // fetch avatar
-router.get("/user/:id/avatar", async (req, res) => {
+router.get("/user/:id/avatar", async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || !user.avatar) {
@@ -168,7 +168,7 @@ router.get("/user/:id/avatar", async (req, res) => {
     res.set("Content-Type", "image/jpg");
     res.send(user.avatar);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 

@@ -5,7 +5,7 @@ const auth = require("../middleware/auth.js");
 const User = require("../models/user.js");
 
 // create task
-router.post("/task", auth, async (req, res) => {
+router.post("/task", auth, async (req, res, next) => {
   // const task = new Task(req.body);
   const task = new Task({
     ...req.body,
@@ -16,7 +16,7 @@ router.post("/task", auth, async (req, res) => {
     await task.save();
     res.send(task);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
@@ -24,7 +24,7 @@ router.post("/task", auth, async (req, res) => {
 // tasks?completed=true
 // tasks?limit=10&skip:10
 // tasks?sortBy=createdAt:desc
-router.get("/tasks", auth, async (req, res) => {
+router.get("/tasks", auth, async (req, res, next) => {
   const match = {};
   const sort = {};
   if (req.query.completed) {
@@ -46,12 +46,12 @@ router.get("/tasks", auth, async (req, res) => {
     });
     res.send(req.user.tasks);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
 // fetch task by id
-router.get("/task/:id", auth, async (req, res) => {
+router.get("/task/:id", auth, async (req, res, next) => {
   const _id = req.params.id;
   try {
     // const task = await Task.findById(_id);
@@ -61,12 +61,12 @@ router.get("/task/:id", auth, async (req, res) => {
     }
     res.send(task);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
 // update task
-router.patch("/task/:id", auth, async (req, res) => {
+router.patch("/task/:id", auth, async (req, res, next) => {
   try {
     // check if invalid field to update
     const updates = Object.keys(req.body);
@@ -95,12 +95,12 @@ router.patch("/task/:id", auth, async (req, res) => {
     // });
     res.send(task);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
 // delete task
-router.delete("/task/:id", auth, async (req, res) => {
+router.delete("/task/:id", auth, async (req, res, next) => {
   try {
     const task = await Task.findOneAndDelete({
       _id: req.params.id,
@@ -111,7 +111,7 @@ router.delete("/task/:id", auth, async (req, res) => {
     }
     res.send(task);
   } catch (error) {
-    res.status(500).send();
+    next(error);
   }
 });
 
